@@ -13,7 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TPUM\ExampleProgram.csproj" />
+    <ProjectReference Include="..\ExampleProgram\ExampleProgram.csproj" />
+    <ProjectReference Include="..\ExampleProgram\ExampleProgram.csproj" />
   </ItemGroup>
 
   <ItemGroup>
