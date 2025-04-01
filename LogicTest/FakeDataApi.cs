@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using Data;
+﻿using Data;
 
 namespace LogicTest
 {
-    public class DataApiMock : AbstractDataApi
+    public class FakeDataApi : AbstractDataApi
     {
-        private readonly DepotMock depotMock = new DepotMock();
+        private readonly FakeDepot fakeDepot = new FakeDepot();
 
         public override IDepot GetDepot()
         {
-            return depotMock;
+            return fakeDepot;
         }
 
-        public class ItemMock : IItem
+        public class FakeItem : IItem
         {
-            public ItemMock(string name, string description, ItemType type, float price, bool isSold)
+            public FakeItem(string name, string description, ItemType type, float price, bool isSold)
             {
                 Id = Guid.NewGuid();
                 Name = name;
@@ -38,22 +36,22 @@ namespace LogicTest
             }
         }
 
-        public class DepotMock : IDepot
+        public class FakeDepot : IDepot
         {
             private readonly List<IItem> allItems;
             private readonly List<IItem> availableItems;
 
-            public DepotMock()
+            public FakeDepot()
             {
                 availableItems = new List<IItem>
                 {
-                    new ItemMock("MockTestName1", "MockTestDescription1", ItemType.Ammo, 1f, false),
-                    new ItemMock("MockTestName2", "MockTestDescription2", ItemType.Ammo, 1.5f, false)
+                    new FakeItem("TestItem1", "TestDescription1", ItemType.Ammo, 1f, false),
+                    new FakeItem("TestItem2", "TestDescription2", ItemType.Ammo, 1.5f, false)
                 };
 
                 allItems = new List<IItem>
                 {
-                    new ItemMock("MockSoldTestName", "MockSoldTestDescription", ItemType.Spaceship, 200f, true)
+                    new FakeItem("SoldTestItem", "SoldTestDescription", ItemType.Spaceship, 200f, true)
                 };
 
                 allItems.AddRange(availableItems);

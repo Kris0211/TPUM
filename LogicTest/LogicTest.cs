@@ -1,15 +1,14 @@
-﻿using Data;
-using Logic;
+﻿using Logic;
 
 namespace LogicTest
 {
     [TestClass]
     public class LogicTest
     {
-        private AbstractLogicApi logicApi = AbstractLogicApi.Create(new DataApiMock());
+        private AbstractLogicApi logicApi = AbstractLogicApi.Create(new FakeDataApi());
 
         [TestMethod]
-        public void SellItem()
+        public void SellItemTest()
         {
             IStoreItem sellItem = logicApi.GetStore().GetAvailableItems()[0];
 
@@ -19,11 +18,12 @@ namespace LogicTest
         }
 
         [TestMethod]
-        public void GetItems()
+        public void GetItemsTest()
         {
-            Assert.IsTrue(logicApi.GetStore().GetAvailableItems().Count == 2);
-            Assert.IsTrue(logicApi.GetStore().GetItems().Count == 3);
-            Assert.IsTrue(logicApi.GetStore().GetItemsByType(LogicItemType.Ammo).Count == 2);
+            IStore store = logicApi.GetStore();
+            Assert.IsTrue(store.GetAvailableItems().Count == 2);
+            Assert.IsTrue(store.GetItems().Count == 3);
+            Assert.IsTrue(store.GetItemsByType(LogicItemType.Ammo).Count == 2);
         }
     }
 }

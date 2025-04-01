@@ -1,6 +1,5 @@
 ﻿using Model;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -87,7 +86,7 @@ namespace ViewModel
 
         private void HandleReputationChanged(object sender, ModelReputationChangedEventArgs args)
         {
-            ReputationString = $"New Reputation: {args.NewReputation}";
+            ReputationString = $"Reputation multiplier: {args.NewReputation}";
             ReloadItems();
         }
 
