@@ -3,10 +3,49 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:View"
+        xmlns:vm="clr-namespace:ViewModel;assembly=ViewModel"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="600" Width="800">
+
+    <Window.DataContext>
+        <vm:ViewModel/>
+    </Window.DataContext>
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Background="White">
+            <Label x:Name="DisplayLabel" Content="Display:" VerticalAlignment="Center"/>
+            <Button x:Name="AllButton" Content="All" Command="{Binding OnAllCommand}" Margin="5,0" Width="80" Height="30"/>
+            <Button x:Name="AvailableButton" Content="Available" Command="{Binding OnAvailableCommand}" Margin="5,0" Width="80"/>
+            <Button x:Name="WeaponsButton" Content="Weapons" Command="{Binding OnWeaponCommand}" Margin="5,0" Width="80"/>
+            <Button x:Name="AmmoButton" Content="Ammo" Command="{Binding OnAmmoCommand}" Margin="5,0" Width="80"/>
+            <Button x:Name="GeneratorsButton" Content="Generators" Command="{Binding OnGeneratorCommand}" Margin="5,0" Width="80"/>
+            <Button x:Name="SpaceshipsButton" Content="Spaceships" Command="{Binding OnSpaceshipCommand}" Margin="5,0" Width="80"/>
+            <TextBlock x:Name="ReputationText" Text="{Binding ReputationString}" FontWeight="Bold" Width="200"/>
+        </StackPanel>
+        <ItemsControl ItemsSource="{Binding Items}" Grid.Row="1">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="3" Rows="2"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="White" BorderThickness="1" Padding="10" Margin="5">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Description}" FontStyle="Italic"/>
+                            <TextBlock Text="{Binding Price, StringFormat='Price: {0:C}'}"/>
+                            <Button Content="Buy" 
+                                    Command="{Binding DataContext.OnItemCommand, Mode=Default, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                    CommandParameter="{Binding Id}"
+                                    IsEnabled="{Binding IsNotSold}"/>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </Window>
