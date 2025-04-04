@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace Data
+namespace ClientData
 {
     public enum ItemType
     {
@@ -23,11 +24,12 @@ namespace Data
         bool IsSold { get; set; }
     }
 
-    public interface IDepot
+    public interface IDepot : IObservable<ReputationChangedEventArgs>
     {
-        event EventHandler<ReputationChangedEventArgs> ReputationChanged;
+        public event Action? ItemsUpdated;
+        public event Action<bool>? TransactionFinish;
 
-        IItem CreateItem(string name, string description, ItemType type, float price);
+        public void RequestUpdate();
         
         List<IItem> GetItems();
         List<IItem> GetAvailableItems();
@@ -35,19 +37,35 @@ namespace Data
         IItem GetItemByID(Guid guid);
         List<IItem> GetItemsByType(ItemType type);
 
-        void AddItem(IItem itemToAdd);
-        void RemoveItem(Guid itemIdToRemove);
         void SellItem(Guid itemId);
+    }
+
+    public interface IConnectionService
+    {
+        public event Action<string>? Logger;
+        public event Action? OnConnectionStateChanged;
+
+        public event Action<string>? OnMessage;
+        public event Action? OnError;
+        public event Action? OnDisconnect;
+
+        public Task Connect(Uri uriPeer);
+        public Task Disconnect();
+
+        public bool IsConnected();
+
+        public Task SendAsync(string message);
     }
 
     public abstract class AbstractDataApi
     {
-        public static AbstractDataApi Create()
+        public static AbstractDataApi Create(IConnectionService? connectionService)
         {
-            return new DataApi();
+            return new DataApi(connectionService);
         }
 
         public abstract IDepot GetDepot();
+        public abstract IConnectionService GetConnectionService();
     }
 
     public class ReputationChangedEventArgs : EventArgs

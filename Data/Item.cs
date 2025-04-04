@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Data
+namespace ClientData
 {
     public class Item : IItem, ICloneable
     {
@@ -13,14 +13,14 @@ namespace Data
 
         public bool IsSold { get; set; }
 
-        public Item(string name, string description, ItemType type, float price)
+        public Item(Guid id, string name, string description, ItemType type, float price, bool isSold)
         {
-            Id = Guid.NewGuid();
+            Id = id;
             Name = name;
             Description = description;
             Type = type;
             Price = price;
-            IsSold = false;
+            IsSold = isSold;
         }
 
         public object Clone()
@@ -43,7 +43,7 @@ namespace Data
 
         public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(obj, null))
+            if (ReferenceEquals(null, obj))
                 return false;
 
             if (ReferenceEquals(this, obj))

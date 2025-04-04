@@ -1,79 +1,129 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using ClientApi;
 
-namespace Data
+namespace ClientData
 {
     internal class Depot : IDepot
     {
         private readonly Dictionary<Guid, IItem> items = new Dictionary<Guid, IItem>();
-        private object itemsLock = new object();
+        private readonly object itemsLock = new object();
 
-        private bool useReputation;
-        private object reputationLock = new object();
+        private HashSet<IObserver<ReputationChangedEventArgs>> observers;
 
-        public event EventHandler<ReputationChangedEventArgs>? ReputationChanged;
+        public event Action? ItemsUpdated;
+        public event Action<bool>? TransactionFinish;
 
-        public Depot()
+        private readonly IConnectionService connectionService;
+
+        public Depot(IConnectionService connectionService)
         {
-            AddItem(CreateItem("Laser Cannon", "+10 Damage", ItemType.Weapon, 50));
-            AddItem(CreateItem("Rocket Launcher", "+20 Damage", ItemType.Weapon, 150));
-            AddItem(CreateItem("Laser Battery", "Ammo for Laser Cannon", ItemType.Ammo, 10));
-            AddItem(CreateItem("Rocket", "Ammo for Rocket Launcher", ItemType.Ammo, 25));
-            AddItem(CreateItem("Shield Generator", "+25 Health", ItemType.Generator, 200));
-            AddItem(CreateItem("Stinger", "Space Fighter", ItemType.Spaceship, 500));
+            observers = new HashSet<IObserver<ReputationChangedEventArgs>>();
 
-            useReputation = true;
-            SimulateReputation();
+            this.connectionService = connectionService;
+            this.connectionService.OnMessage += OnMessage;
         }
 
         ~Depot()
         {
-            useReputation = false;
-            lock (reputationLock) {}
+            List<IObserver<ReputationChangedEventArgs>> cachedObservers = observers.ToList();
+            foreach (var observer in cachedObservers)
+            {
+                observer?.OnCompleted();
+            }
         }
 
-        private async void SimulateReputation()
+        private void OnMessage(string message)
         {
-            while (true)
+            Serializer serializer = serializer.Create();
+
+            if (serializer.GetResponseHeader(message) == UpdateAllResponse.HeaderStatic)
             {
-                Random random = new Random();
-                float waitSeconds = (float)random.NextDouble() * 2f + 3f; // range 3 - 5 seconds
-                await Task.Delay((int)Math.Truncate(waitSeconds * 1000f));
-
-                float reputation = (float)random.NextDouble() + 0.5f; // range 0.5 - 1.5
-                lock (itemsLock)
+                UpdateAllResponse response = serializer.Deserialize<UpdateAllResponse>(message);
+                UpdateAllProducts(response);
+            }
+            else if (serializer.GetResponseHeader(message) == ReputationChangedResponse.HeaderStatic)
+            {
+                ReputationChangedResponse response = serializer.Deserialize<ReputationChangedEventArgs>(message);
+                UpdateAllPrices(response);
+            }
+            else if (serializer.GetResponseHeader(message) == TransactionResponse.HeaderStatic)
+            {
+                TransactionResponse response = serializer.Deserialize<TransactionResponse>(message);
+                if (response.Succeeded)
                 {
-                    foreach (IItem item in items.Values)
-                    {
-                        item.Price *= reputation;
-                    }
+                    Task.Run(() => RequestItems());
+                    TransactionFinish?.Invoke(true);
                 }
-
-                ReputationChanged?.Invoke(this, new ReputationChangedEventArgs(reputation));
-                lock (reputationLock)
+                else
                 {
-                    if (!useReputation)
-                    {
-                        break;
-                    }
+                    TransactionFinish?.Invoke(false);
                 }
             }
         }
 
-        public IItem CreateItem(string name, string description, ItemType type, float price)
+        private void UpdateAllProducts(UpdateAllResponse response)
         {
-            return new Item(name, description, type, price);
-        }
+            if (response.Items == null)
+                return;
 
-        public void SellItem(Guid itemId)
-        {
             lock (itemsLock)
             {
-                if (items.ContainsKey(itemId))
+                items.Clear();
+
+                foreach (ItemDTO item in response.Items)
                 {
-                    items[itemId].IsSold = true;
+                    items.Add(item.Id, item.ToItem());
                 }
+            }
+
+            ItemsUpdated?.Invoke();
+        }
+
+        private void UpdateAllPrices(ReputationChangedResponse response)
+        {
+            if (response.NewPrices == null) return;
+
+            lock(itemsLock)
+            {
+                foreach (var newPrice in response.NewPrices)
+                {
+                    if (items.ContainsKey(newPrice.ItemId))
+                    {
+                        items[newPrice.ItemId].Price = newPrice.NewPrice;
+                    }
+                }
+            }
+
+            foreach (IObserver<ReputationChangedEventArgs>? observer in observers)
+            {
+                observers.OnNext(new ReputationChangedEventArgs(response.NewReputation));
+            }
+        }
+
+        public async Task RquestItems()
+        {
+            Serializer serializer = Serializer.Create();
+            await connectionService.SendAsync(serializer.Serialize(new GetItemsCommand()));
+        }
+
+        public void RequestUpdate()
+        {
+            if (connectionService.IsConnected())
+            {
+                Task task = Task.Run(async () => await RequestItems());
+            }
+        }
+
+        public async Task SellItem(Guid itemId)
+        {
+            if (connectionService.IsConnected())
+            {
+                Serializer serializer = Serializer.Create();
+                SellItemCommand sellItemCommand = new SellItemCommand(itemId);
+                await connectionService.SendAsync(serializer.Serialize(sellItemCommand));
             }
         }
 
@@ -155,6 +205,34 @@ namespace Data
             }
 
             return result;
+        }
+
+        public IDisposable Subscribe(IObserver<ReputationChangedEventArgs> observer)
+        {
+            observers.Add(observer);
+            return new DepotDisposable(this, observer);
+        }
+
+        private void UnSubscribe(IObserver<ReputationChangedEventArgs> observer)
+        {
+            observers.Remove(observer);
+        }
+
+        private class DepotDisposable : IDisposable
+        {
+            private readonly Depot depot;
+            private readonly IObserver<ReputationChangedEventArgs> observer;
+
+            public DepotDisposable(Depot depot, IObserver<ReputationChangedEventArgs> observer)
+            {
+                this.depot = depot;
+                this.observer = observer;
+            }
+
+            public void Dispose()
+            {
+                depot.UnSubscribe(observer);
+            }
         }
     }
 }
