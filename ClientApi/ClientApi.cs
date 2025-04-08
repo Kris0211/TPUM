@@ -112,4 +112,5 @@ namespace ClientApi
         public bool Succeeded;
 
         public TransactionResponse() : base(HeaderStatic) { }
+    }
 }

@@ -1,26 +1,24 @@
 ﻿using System;
 
-namespace ClientData
+namespace ServerData
 {
-    public class Item : IItem, ICloneable
+    internal class Item : IItem, ICloneable
     {
         public Guid Id { get; }
         public string Name { get; private set; }
         public string Description { get; private set; }
-
         public ItemType Type { get; }
         public float Price { get; set; }
-
         public bool IsSold { get; set; }
 
-        public Item(Guid id, string name, string description, ItemType type, float price, bool isSold)
+        public Item(string name, string description, ItemType type, float price)
         {
-            Id = id;
+            Id = Guid.NewGuid();
             Name = name;
             Description = description;
             Type = type;
             Price = price;
-            IsSold = isSold;
+            IsSold = false;
         }
 
         public object Clone()
@@ -34,8 +32,8 @@ namespace ClientData
         protected bool Equals(Item other)
         {
             return Id.Equals(other.Id) 
-                && Name == other.Name 
-                && Description == other.Description 
+                && Name.Equals(other.Name) 
+                && Description.Equals(other.Description) 
                 && Type == other.Type 
                 && Price.Equals(other.Price) 
                 && IsSold == other.IsSold;
