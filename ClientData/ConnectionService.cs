@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Tracing;
-using System.Text;
+using System.Net.WebSockets;
 using System.Threading.Tasks;
+using ServerPresentation;
 
 namespace ClientData
 {
@@ -28,7 +27,7 @@ namespace ClientData
             }
             catch (WebSocketException exception)
             {
-                Logeger?.Invoke($"WebSocket exception: {exception.Message}");
+                Logger?.Invoke($"WebSocket exception: {exception.Message}");
                 OnError?.Invoke();
             }
         }

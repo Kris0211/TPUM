@@ -1,29 +1,30 @@
-﻿using Logic;
+﻿using ClientLogic;
+using LogicTest;
 
-namespace LogicTest
+namespace ClientLogicTest;
+
+[TestClass]
+public class ClientLogicTest
 {
-    [TestClass]
-    public class LogicTest
+    private AbstractLogicApi logicApi = AbstractLogicApi.Create(new FakeDataApi());
+
+    [TestMethod]
+    public void SellItem()
     {
-        private AbstractLogicApi logicApi = AbstractLogicApi.Create(new FakeDataApi());
+        IStore store = logicApi.GetStore();
+        IStoreItem itemToSell = store.GetAvailableItems()[0];
+        store.SellItem(itemToSell.Id);
 
-        [TestMethod]
-        public void SellItemTest()
-        {
-            IStoreItem sellItem = logicApi.GetStore().GetAvailableItems()[0];
+        Assert.IsTrue(store.GetAvailableItems().Count == 1);
+    }
 
-            logicApi.GetStore().SellItem(sellItem.Id);
+    [TestMethod]
+    public void GetItems()
+    {
+        IStore store = logicApi.GetStore();
 
-            Assert.IsTrue(logicApi.GetStore().GetAvailableItems().Count == 1);
-        }
-
-        [TestMethod]
-        public void GetItemsTest()
-        {
-            IStore store = logicApi.GetStore();
-            Assert.IsTrue(store.GetAvailableItems().Count == 2);
-            Assert.IsTrue(store.GetItems().Count == 3);
-            Assert.IsTrue(store.GetItemsByType(LogicItemType.Ammo).Count == 2);
-        }
+        Assert.IsTrue(store.GetAvailableItems().Count == 2);
+        Assert.IsTrue(store.GetItems().Count == 3);
+        Assert.IsTrue(store.GetItemsByType(LogicItemType.Ammo).Count == 2);
     }
 }

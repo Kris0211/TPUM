@@ -28,16 +28,16 @@ namespace ClientDataTest
 
         public async Task SendAsync(string message)
         {
-            if (serializer.GetResponseHeader(message) == GetItemsCommand.HeaderStatic)
+            if (serializer.GetResponseHeader(message) == GetItemsCommand.StaticHeader)
             {
                 UpdateAllResponse response = new UpdateAllResponse();
                 response.Items = [new ItemDTO(new Guid("testId"), "Test", "Random Description", "Generator", 2000.0f, false)];
                 OnMessage?.Invoke(serializer.Serialize(response));
             }
-            else if (serializer.GetResponseHeader(message) == SellItemCommand.HeaderStatic)
+            else if (serializer.GetResponseHeader(message) == SellItemCommand.StaticHeader)
             {
                 SellItemCommand sellItemCommand = serializer.Deserialize<SellItemCommand>(message);
-                lastSoldGuid = sellItemCommand.ItemId;
+                lastSoldGuid = sellItemCommand.ItemID;
 
                 TransactionResponse response = new TransactionResponse();
                 response.Succeeded = true;
@@ -61,7 +61,7 @@ namespace ClientDataTest
             int i = 0;
             foreach (IItem item in items)
             {
-                newPriceDTOs[i].ItemId = item.Id;
+                newPriceDTOs[i].ItemID = item.Id;
                 newPriceDTOs[i].NewPrice = item.Price * newReputation;
                 i++;
             }

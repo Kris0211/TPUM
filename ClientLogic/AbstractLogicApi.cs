@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Data;
+using System.Threading.Tasks;
+using ClientData;
 
-namespace Logic
+namespace ClientLogic
 {
     public class LogicReputationChangedEventArgs : EventArgs
     {
@@ -13,7 +14,7 @@ namespace Logic
             this.NewReputation = newReputation;
         }
 
-        internal LogicReputationChangedEventArgs(ReputationChangedEventArgs args) 
+        internal LogicReputationChangedEventArgs(ReputationChangedEventArgs args)
         {
             this.NewReputation = args.NewReputation;
         }
@@ -32,8 +33,10 @@ namespace Logic
         Guid Id { get; }
         string Name { get; }
         string Description { get; }
+
         LogicItemType Type { get; }
         float Price { get; }
+
         bool IsSold { get; }
     }
 
@@ -41,11 +44,30 @@ namespace Logic
     {
         public event EventHandler<LogicReputationChangedEventArgs> ReputationChanged;
 
-        public void SellItem(Guid itemId);
+        public event Action? ItemsUpdated;
+        public event Action<bool>? TransactionFinished;
+
+        public void RequestUpdate();
 
         public List<IStoreItem> GetItems();
         public List<IStoreItem> GetAvailableItems();
-        public List<IStoreItem> GetItemsByType(LogicItemType type);
+        public List<IStoreItem> GetItemsByType(LogicItemType logicItemType);
+
+        public Task SellItem(Guid itemId);
+    }
+
+    public interface ILogicConnectionService
+    {
+        public event Action<string>? Logger;
+        public event Action? OnConnectionStateChanged;
+
+        public event Action<string>? OnMessage;
+        public event Action? OnError;
+
+        public Task Connect(Uri peerUri);
+        public Task Disconnect();
+
+        public bool IsConnected();
     }
 
     public abstract class AbstractLogicApi
@@ -57,12 +79,13 @@ namespace Logic
             DataApi = dataApi;
         }
 
-        public static AbstractLogicApi Create(AbstractDataApi? abstractDataApi = null)
+        public static AbstractLogicApi Create(AbstractDataApi? dataAbstractApi = null)
         {
-            AbstractDataApi dataApi = abstractDataApi ?? AbstractDataApi.Create();
-            return new Logic(dataApi);
+            AbstractDataApi dataApi = dataAbstractApi ?? AbstractDataApi.Create(null);
+            return new ClientLogic.Logic(dataApi);
         }
 
         public abstract IStore GetStore();
+        public abstract ILogicConnectionService GetConnectionService();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ClientApi;
 using ClientData;
+using System.Runtime.InteropServices;
 
 namespace ClientDataTest
 {
@@ -14,7 +15,7 @@ namespace ClientDataTest
             connectionService.FakeUpdateAll([
                 new ItemDTO(Guid.NewGuid(), "Name 1", "Description 1", "Generator", 2000.0f, false),
                 new ItemDTO(Guid.NewGuid(), "Name 2", "Description 2", "Spaceship", 10000.0f, false)
-                ]);
+            ]);
         }
 
         [TestMethod]
@@ -27,6 +28,7 @@ namespace ClientDataTest
 
             connectionService.FakeUpdateAll(itemDTOs);
             List<IItem> items = data.GetDepot().GetItems();
+            Assert.IsTrue(items.Count > 0);
 
             for (int i = 0; i < itemDTOs.Length; i++)
             {
@@ -84,7 +86,7 @@ namespace ClientDataTest
             List<IItem> items = data.GetDepot().GetItems();
             IItem testItem = items[0];
 
-            Assert.AreEqual(testItem, data.GetDepot().GetItemById(testItem.Id));
+            Assert.AreEqual(testItem, data.GetDepot().GetItemByID(testItem.Id));
         }
 
         [TestMethod]

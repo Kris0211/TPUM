@@ -1,7 +1,7 @@
 ﻿using System;
-using Data;
+using ClientData;
 
-namespace Logic
+namespace ClientLogic
 {
     class StoreItem : IStoreItem
     {

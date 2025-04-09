@@ -1,48 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
-using Data;
+using System.Threading.Tasks;
+using ClientData;
 
-namespace Logic
+namespace ClientLogic
 {
-    class Store : IStore
+    class Store : IStore, IObserver<ReputationChangedEventArgs>
     {
         private readonly IDepot depot;
 
         public event EventHandler<LogicReputationChangedEventArgs>? ReputationChanged;
+        public event Action? ItemsUpdated;
+        public event Action<bool>? TransactionFinished;
+
+        private IDisposable DepotSubscriptionHandle;
 
         public Store(IDepot depot)
         {
             this.depot = depot;
 
-            depot.ReputationChanged += HandleOnReputationChanged;
+            DepotSubscriptionHandle = depot.Subscribe(this);
+
+            depot.ItemsUpdated += OnItemsUpdated;
+            depot.TransactionFinished += OnTransactionFinished;
         }
 
-        private void HandleOnReputationChanged(object sender, ReputationChangedEventArgs args)
+        public void RequestUpdate()
         {
-            ReputationChanged?.Invoke(this, new LogicReputationChangedEventArgs(args));
+            depot.RequestUpdate();
         }
 
-        public void SellItem(Guid itemId)
+        public async Task SellItem(Guid itemId)
         {
             List<IStoreItem> items = new List<IStoreItem>();
-
-            foreach (IItem item in depot.GetAvailableItems())
+            foreach (var item in depot.GetAvailableItems())
             {
                 items.Add(new StoreItem(item));
             }
 
             IStoreItem? foundItem = null;
-            foreach (IStoreItem storeItem in items)
+            foreach (var item in items)
             {
-                if (storeItem.Id == itemId)
+                if (item.Id == itemId)
                 {
-                    foundItem = storeItem;
+                    foundItem = item;
+                    break;
                 }
             }
 
             if (foundItem != null && !foundItem.IsSold)
             {
-                depot.SellItem(foundItem.Id);
+                await depot.SellItem(foundItem.Id);
             }
             else
             {
@@ -52,38 +60,59 @@ namespace Logic
 
         public List<IStoreItem> GetItems()
         {
-            List<IStoreItem> items = new List<IStoreItem>();
-
-            foreach (IItem item in depot.GetItems())
+            List<IStoreItem> result = new List<IStoreItem>();
+            foreach (var item in depot.GetItems())
             {
-                items.Add(new StoreItem(item));
+                result.Add(new StoreItem(item));
             }
 
-            return items;
+            return result;
         }
 
         public List<IStoreItem> GetAvailableItems()
         {
-            List<IStoreItem> items = new List<IStoreItem>();
-
-            foreach (IItem item in depot.GetAvailableItems())
+            List<IStoreItem> result = new List<IStoreItem>();
+            foreach (var item in depot.GetAvailableItems())
             {
-                items.Add(new StoreItem(item));
+                result.Add(new StoreItem(item));
             }
 
-            return items;
+            return result;
         }
 
         public List<IStoreItem> GetItemsByType(LogicItemType logicItemType)
         {
-            List<IStoreItem> items = new List<IStoreItem>();
-
-            foreach (IItem item in depot.GetItemsByType((ItemType)logicItemType))
+            List<IStoreItem> result = new List<IStoreItem>();
+            foreach (var item in depot.GetItemsByType((ItemType)logicItemType))
             {
-                items.Add(new StoreItem(item));
+                result.Add(new StoreItem(item));
             }
 
-            return items;
+            return result;
+        }
+
+        public void OnCompleted()
+        {
+            DepotSubscriptionHandle.Dispose();
+        }
+
+        public void OnError(Exception error)
+        {
+        }
+
+        public void OnNext(ReputationChangedEventArgs value)
+        {
+            ReputationChanged?.Invoke(this, new LogicReputationChangedEventArgs(value));
+        }
+
+        private void OnItemsUpdated()
+        {
+            ItemsUpdated?.Invoke();
+        }
+
+        private void OnTransactionFinished(bool succeeded)
+        { 
+            TransactionFinished?.Invoke(succeeded);
         }
     }
 }

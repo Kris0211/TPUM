@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ServerPresentation
 {
@@ -6,20 +7,20 @@ namespace ServerPresentation
     {
         public override string Serialize<T>(T objectToSerialize)
         {
-            return JsonSerializer.Serialize(objectToSerialize);
+            return JsonConvert.SerializeObject(objectToSerialize);
         }
 
         public override T Deserialize<T>(string message)
         {
-            return JsonSerializer.Deserialize<T>(message);
+            return JsonConvert.DeserializeObject<T>(message);
         }
 
         public override string? GetCommandHeader(string message)
         {
-            using JsonDocument doc = JsonDocument.Parse(message);
-            if (doc.RootElement.TryGetProperty("Header", out JsonElement header))
+            JObject jObject = JObject.Parse(message);
+            if (jObject.ContainsKey("Header"))
             {
-                return header.GetString();
+                return (string)jObject["Header"];
             }
 
             return null;

@@ -3,16 +3,16 @@ using Newtonsoft.Json.Linq;
 
 namespace ClientData
 {
-    internal class JsonSerializer : Serializer
+    internal class JsonDataSerializer : Serializer
     {
-        public override string Serialize<T>(T objToSerialize)
+        public override string Serialize<T>(T objectToSerialize)
         {
-            return JsonConvert.SerializeObject(objToSerialize);
+            return JsonConvert.SerializeObject(objectToSerialize);
         }
 
         public override T Deserialize<T>(string message)
         {
-            return JsonConverter.DeseralizeObject<T>(message);
+            return JsonConvert.DeserializeObject<T>(message);
         }
 
         public override string? GetResponseHeader(string message)

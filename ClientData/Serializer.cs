@@ -7,6 +7,6 @@
 
         public abstract string? GetResponseHeader(string message);
 
-        public static Serializer Create() { return new JsonSerializer(); }
+        public static Serializer Create() { return new JsonDataSerializer(); }
     }
 }

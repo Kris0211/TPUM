@@ -27,17 +27,17 @@ namespace ClientData
     public interface IDepot : IObservable<ReputationChangedEventArgs>
     {
         public event Action? ItemsUpdated;
-        public event Action<bool>? TransactionFinish;
+		public event Action<bool>? TransactionFinished;
+		
+	    public void RequestUpdate();
+	    
+	    public List<IItem> GetItems();
+	    public List<IItem> GetAvailableItems();
+	    
+	    public IItem GetItemByID(Guid guid);
+	    public List<IItem> GetItemsByType(ItemType type);
 
-        public void RequestUpdate();
-        
-        List<IItem> GetItems();
-        List<IItem> GetAvailableItems();
-
-        IItem GetItemByID(Guid guid);
-        List<IItem> GetItemsByType(ItemType type);
-
-        void SellItem(Guid itemId);
+        public Task SellItem(Guid itemId);
     }
 
     public interface IConnectionService

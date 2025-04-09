@@ -14,7 +14,8 @@ namespace ClientData
         private HashSet<IObserver<ReputationChangedEventArgs>> observers;
 
         public event Action? ItemsUpdated;
-        public event Action<bool>? TransactionFinish;
+        public event Action<bool>? TransactionFinished;
+
 
         private readonly IConnectionService connectionService;
 
@@ -29,7 +30,7 @@ namespace ClientData
         ~Depot()
         {
             List<IObserver<ReputationChangedEventArgs>> cachedObservers = observers.ToList();
-            foreach (var observer in cachedObservers)
+            foreach (IObserver<ReputationChangedEventArgs>? observer in cachedObservers)
             {
                 observer?.OnCompleted();
             }
@@ -37,29 +38,29 @@ namespace ClientData
 
         private void OnMessage(string message)
         {
-            Serializer serializer = serializer.Create();
+            Serializer serializer = Serializer.Create();
 
-            if (serializer.GetResponseHeader(message) == UpdateAllResponse.HeaderStatic)
+            if (serializer.GetResponseHeader(message) == UpdateAllResponse.StaticHeader)
             {
                 UpdateAllResponse response = serializer.Deserialize<UpdateAllResponse>(message);
                 UpdateAllProducts(response);
             }
-            else if (serializer.GetResponseHeader(message) == ReputationChangedResponse.HeaderStatic)
+            else if (serializer.GetResponseHeader(message) == ReputationChangedResponse.StaticHeader)
             {
-                ReputationChangedResponse response = serializer.Deserialize<ReputationChangedEventArgs>(message);
+                ReputationChangedResponse response = serializer.Deserialize<ReputationChangedResponse>(message);
                 UpdateAllPrices(response);
             }
-            else if (serializer.GetResponseHeader(message) == TransactionResponse.HeaderStatic)
+            else if (serializer.GetResponseHeader(message) == TransactionResponse.StaticHeader)
             {
                 TransactionResponse response = serializer.Deserialize<TransactionResponse>(message);
                 if (response.Succeeded)
                 {
                     Task.Run(() => RequestItems());
-                    TransactionFinish?.Invoke(true);
+                    TransactionFinished?.Invoke(true);
                 }
                 else
                 {
-                    TransactionFinish?.Invoke(false);
+                    TransactionFinished?.Invoke(false);
                 }
             }
         }
@@ -72,7 +73,6 @@ namespace ClientData
             lock (itemsLock)
             {
                 items.Clear();
-
                 foreach (ItemDTO item in response.Items)
                 {
                     items.Add(item.Id, item.ToItem());
@@ -84,26 +84,27 @@ namespace ClientData
 
         private void UpdateAllPrices(ReputationChangedResponse response)
         {
-            if (response.NewPrices == null) return;
+            if (response.NewPrices == null)
+                return;
 
-            lock(itemsLock)
+            lock (itemsLock)
             {
                 foreach (var newPrice in response.NewPrices)
                 {
-                    if (items.ContainsKey(newPrice.ItemId))
+                    if (items.ContainsKey(newPrice.ItemID))
                     {
-                        items[newPrice.ItemId].Price = newPrice.NewPrice;
+                        items[newPrice.ItemID].Price = newPrice.NewPrice;
                     }
                 }
             }
 
             foreach (IObserver<ReputationChangedEventArgs>? observer in observers)
             {
-                observers.OnNext(new ReputationChangedEventArgs(response.NewReputation));
+                observer.OnNext(new ReputationChangedEventArgs(response.NewReputation));
             }
         }
 
-        public async Task RquestItems()
+        public async Task RequestItems()
         {
             Serializer serializer = Serializer.Create();
             await connectionService.SendAsync(serializer.Serialize(new GetItemsCommand()));
@@ -132,10 +133,7 @@ namespace ClientData
             List<IItem> result = new List<IItem>();
             lock (itemsLock)
             {
-                foreach (IItem item in items.Values)
-                {
-                    result.Add((IItem)item.Clone());
-                }
+                result.AddRange(items.Values.Select(item => (IItem)item.Clone()));
             }
 
             return result;
@@ -146,13 +144,9 @@ namespace ClientData
             List<IItem> result = new List<IItem>();
             lock (itemsLock)
             {
-                foreach (IItem item in items.Values)
-                {
-                    if (!item.IsSold)
-                    {
-                        result.Add((IItem)item.Clone());
-                    }
-                }
+                result.AddRange(items.Values
+                    .Where(item => !item.IsSold)
+                    .Select(item => (IItem)item.Clone()));
             }
 
             return result;
@@ -179,12 +173,14 @@ namespace ClientData
             IItem result;
             lock (itemsLock)
             {
-                if (!items.ContainsKey(guid))
+                if (items.ContainsKey(guid))
+                {
+                    result = items[guid];
+                }
+                else
                 {
                     throw new KeyNotFoundException();
                 }
-                
-                result = items[guid];
             }
 
             return result;
@@ -195,13 +191,9 @@ namespace ClientData
             List<IItem> result = new List<IItem>();
             lock (itemsLock)
             {
-                foreach (IItem item in items.Values)
-                {
-                    if (item.Type == type)
-                    {
-                        result.Add((IItem)item.Clone());
-                    }
-                }
+                result.AddRange(items.Values
+                    .Where(item => item.Type == type)
+                    .Select(item => (IItem)item.Clone()));
             }
 
             return result;
@@ -213,7 +205,7 @@ namespace ClientData
             return new DepotDisposable(this, observer);
         }
 
-        private void UnSubscribe(IObserver<ReputationChangedEventArgs> observer)
+        private void Unsubscribe(IObserver<ReputationChangedEventArgs> observer)
         {
             observers.Remove(observer);
         }
@@ -231,7 +223,7 @@ namespace ClientData
 
             public void Dispose()
             {
-                depot.UnSubscribe(observer);
+                depot.Unsubscribe(observer);
             }
         }
     }
