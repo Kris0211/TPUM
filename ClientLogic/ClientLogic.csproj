@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<LangVersion>8</LangVersion>
 	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ClientData\ClientData.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\ClientData\ClientData.csproj" />
+	</ItemGroup>
 
 </Project>

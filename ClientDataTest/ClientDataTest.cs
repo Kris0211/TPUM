@@ -16,27 +16,29 @@ namespace ClientDataTest
                 new ItemDTO(Guid.NewGuid(), "Name 1", "Description 1", "Generator", 2000.0f, false),
                 new ItemDTO(Guid.NewGuid(), "Name 2", "Description 2", "Spaceship", 10000.0f, false)
             ]);
+            Thread.Sleep(10);
         }
 
         [TestMethod]
         public void UpdateAllTest()
         {
+            PrepareData();
+
             ItemDTO[] itemDTOs = [
-                new ItemDTO(Guid.NewGuid(), "Name 1", "Description 1", "Generator", 2000.0f, false),
-                new ItemDTO(Guid.NewGuid(), "Name 2", "Description 2", "Spaceship", 10000.0f, false)
-                ];
+                new ItemDTO(Guid.NewGuid(), "Name 3", "Description 3", "Generator", 2000.0f, false),
+                new ItemDTO(Guid.NewGuid(), "Name 4", "Description 4", "Spaceship", 11111.0f, false)
+            ];
 
             connectionService.FakeUpdateAll(itemDTOs);
             List<IItem> items = data.GetDepot().GetItems();
-            Assert.IsTrue(items.Count > 0);
 
             for (int i = 0; i < itemDTOs.Length; i++)
             {
-                Assert.IsTrue(itemDTOs[i].Id == items[i].Id &&
-                    itemDTOs[i].Name == items[i].Name &&
-                    itemDTOs[i].Description == items[i].Description &&
-                    itemDTOs[i].Price == items[i].Price &&
-                    itemDTOs[i].IsSold == items[i].IsSold);
+                Assert.AreEqual(itemDTOs[i].Id, items[i].Id);
+                Assert.AreEqual(itemDTOs[i].Name, items[i].Name);
+                Assert.AreEqual(itemDTOs[i].Description,items[i].Description);
+                Assert.AreEqual(itemDTOs[i].Price, items[i].Price);
+                Assert.AreEqual(itemDTOs[i].IsSold, items[i].IsSold);
             }
         }
 

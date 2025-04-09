@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Logic;
+using ClientLogic;
 
 namespace Model
 {

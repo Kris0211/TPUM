@@ -1,4 +1,6 @@
-﻿namespace ClientApi
+﻿using System;
+
+namespace ClientApi
 {
     [Serializable]
     public abstract class ServerCommand
