@@ -1,8 +1,10 @@
-﻿using Model;
+﻿using ClientLogic;
+using Model;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace ViewModel
@@ -66,13 +68,58 @@ namespace ViewModel
             }
         }
 
+        private string connectionString;
+        public string ConnectionString
+        {
+            get => connectionString;
+            private set
+            {
+                if (connectionString != value)
+                {
+                    connectionString = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string transactionString;
+        public string TransactionString
+        {
+            get => transactionString;
+            private set
+            {
+                if (transactionString != value)
+                {
+                    transactionString = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public ViewModel()
         {
-            this.model = new Model.Model(null);
-            model.ReputationChanged += HandleReputationChanged;
+            model = new Model.Model(null);
+            model.ModelConnectionService.OnConnectionStateChanged += OnConnectionStateChanged;
+            model.ModelConnectionService.OnError += OnConnectionStateChanged;
+
+            model.ModelConnectionService.Logger += Log;
+            model.ModelConnectionService.OnMessage += OnMessage;
+
+            model.DepotPresentation.ReputationChanged += HandleReputationChanged;
+            model.DepotPresentation.OnItemsUpdated += HandleOnItemsUpdated;
+            model.DepotPresentation.TransactionFinished += HandleTransactionFinish;
+
+            OnConnectionStateChanged();
 
             CurrentTab = TabEnum.All;
-            Items = new ObservableCollection<ItemPresentation>(model.depotPresentation.GetItems());
+            Items = new AsyncObservableCollection<ItemPresentation>();
+            foreach (IStoreItem item in model.DepotPresentation.GetItems())
+            {
+                Items.Add(new ItemPresentation(item));
+            }
+
+            reputationString = "Reputation: 1.0";
+            transactionString = "Transaction: Ready";
 
             OnAllCommand = new RelayCommand(() => HandleOnAllButton());
             OnAvailableCommand = new RelayCommand(() => HandleOnAvailableButton());
@@ -84,9 +131,55 @@ namespace ViewModel
             OnItemCommand = new RelayCommand<Guid>((id) => HandleOnItemButton(id));
         }
 
+        public async Task CloseConnection()
+        {
+            if (model.ModelConnectionService.IsConnected())
+            {
+                await model.ModelConnectionService.Disconnect();
+            }
+        }
+
+        private void HandleTransactionFinish(bool succeeded)
+        {
+            string time = DateTime.Now.ToLongTimeString();
+            TransactionString = succeeded ?
+                $"Transaction finished succesfully! ({time})"
+                : $"Transaction failed! ({time})";
+        }
+
+        private void Log(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        private void OnMessage(string message)
+        {
+            Log($"New Message: {message}");
+        }
+
+        private void OnConnectionStateChanged()
+        {
+            bool actualState = model.ModelConnectionService.IsConnected();
+            ConnectionString = actualState ? "Connected" : "Disconnected";
+
+            if (!actualState)
+            {
+                Task.Run(() => model.ModelConnectionService.Connect(new Uri(@"ws://localhost:21370")));
+            }
+            else
+            {
+                model.DepotPresentation.RequestUpdate();
+            }
+        }
+
         private void HandleReputationChanged(object sender, ModelReputationChangedEventArgs args)
         {
             ReputationString = $"Reputation multiplier: {args.NewReputation}";
+            ReloadItems();
+        }
+
+        private void HandleOnItemsUpdated()
+        {
             ReloadItems();
         }
 
@@ -135,8 +228,7 @@ namespace ViewModel
         public ICommand OnItemCommand { get; private set; }
         private void HandleOnItemButton(Guid id)
         {
-            model.SellItem(id);
-            ReloadItems();
+            Task.Run(async () => await model.SellItem(id));
         }
 
         private void ReloadItems()
@@ -145,21 +237,21 @@ namespace ViewModel
 
             if (CurrentTab == TabEnum.All)
             {
-                foreach (ItemPresentation item in model.depotPresentation.GetItems())
+                foreach (ItemPresentation item in model.DepotPresentation.GetItems())
                 {
                     items.Add(item);
                 }
             }
             else if (CurrentTab == TabEnum.Available)
             {
-                foreach (ItemPresentation item in model.depotPresentation.GetAvailableItems())
+                foreach (ItemPresentation item in model.DepotPresentation.GetAvailableItems())
                 {
                     items.Add(item);
                 }
             }
             else
             {
-                foreach (ItemPresentation item in model.depotPresentation.GetItemsByType((PresentationItemType)CurrentTab))
+                foreach (ItemPresentation item in model.DepotPresentation.GetItemsByType((PresentationItemType)CurrentTab))
                 {
                     items.Add(item);
                 }

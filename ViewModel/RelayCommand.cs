@@ -6,25 +6,19 @@ namespace ViewModel
     public class RelayCommand : ICommand
     {
         private readonly Action execute;
-        private readonly Func<bool> canExecute;
+        private readonly Func<bool>? canExecute;
 
         public RelayCommand(Action execute) : this(execute, null)
         {
-
         }
 
-        public RelayCommand(Action execute, Func<bool> canExecute)
+        public RelayCommand(Action execute, Func<bool>? canExecute)
         {
-            if (execute == null)
-            {
-                throw new ArgumentNullException("execute");
-            }
-
             this.execute = execute;
             this.canExecute = canExecute;
         }
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged;
 
         internal void RaiseCanExecuteChanged() 
         {
@@ -42,28 +36,22 @@ namespace ViewModel
         }
     }
 
-    public class  RelayCommand<T> : ICommand
+    public class RelayCommand<T> : ICommand
     {
         private readonly Action<T> execute;
-        private readonly Predicate<T> canExecutePredicate;
+        private readonly Predicate<T>? canExecutePredicate;
 
         public RelayCommand(Action<T> execute) : this(execute, null)
         {
-
         }
 
-        public RelayCommand(Action<T> execute, Predicate<T> canExecutePredicate)
+        public RelayCommand(Action<T> execute, Predicate<T>? canExecutePredicate)
         {
-            if (execute == null)
-            {
-                throw new ArgumentNullException("execute");
-            }
-
             this.execute = execute;
             this.canExecutePredicate = canExecutePredicate;
         }
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler? CanExecuteChanged;
 
         internal void RaiseCanExecuteChanged()
         {
@@ -72,7 +60,7 @@ namespace ViewModel
 
         public bool CanExecute(object objectParameter)
         {
-            return canExecutePredicate == null ? true : canExecutePredicate((T)objectParameter);
+            return canExecutePredicate == null || canExecutePredicate((T)objectParameter);
         }
 
         public void Execute(object parameter)

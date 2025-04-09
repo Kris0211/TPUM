@@ -1,5 +1,6 @@
 ﻿using System;
-using Logic;
+using System.Threading.Tasks;
+using ClientLogic;
 
 namespace Model
 {
@@ -29,26 +30,22 @@ namespace Model
     public class Model
     {
         private AbstractLogicApi abstractLogicApi;
+        public DepotPresentation DepotPresentation { get; private set; }
+        public ModelConnectionService ModelConnectionService { get; private set; }
 
-        public DepotPresentation depotPresentation {  get; private set; }
+        public event Action? ItemsUpdated;
 
-        public event EventHandler<ModelReputationChangedEventArgs>? ReputationChanged;
-
-        public Model(AbstractLogicApi abstractLogicApi)
+        public Model(AbstractLogicApi? abstractLogicApi)
         {
-            this.abstractLogicApi = abstractLogicApi == null ? AbstractLogicApi.Create() : abstractLogicApi;
-            this.abstractLogicApi.GetStore().ReputationChanged += HandleReputationChanged;
-            this.depotPresentation = new DepotPresentation(this.abstractLogicApi.GetStore());
+            this.abstractLogicApi = abstractLogicApi ?? AbstractLogicApi.Create();
+
+            DepotPresentation = new DepotPresentation(this.abstractLogicApi.GetStore());
+            ModelConnectionService = new ModelConnectionService(this.abstractLogicApi.GetConnectionService());
         }
 
-        public void SellItem(Guid itemId)
+        public async Task SellItem(Guid itemId)
         {
-            abstractLogicApi.GetStore().SellItem(itemId);
-        }
-
-        public void HandleReputationChanged(object sender, LogicReputationChangedEventArgs args)
-        {
-            ReputationChanged?.Invoke(this, new ModelReputationChangedEventArgs(args));
+            await abstractLogicApi.GetStore().SellItem(itemId);
         }
     }
 }
