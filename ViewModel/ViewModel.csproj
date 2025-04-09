@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+		<AssemblyName>ViewModel</AssemblyName>
         <TargetFramework>net48</TargetFramework>
         <Nullable>enable</Nullable>
         <LangVersion>8</LangVersion>

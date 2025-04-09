@@ -25,7 +25,7 @@
             <Button x:Name="SpaceshipsButton" Content="Spaceships" Command="{Binding OnSpaceshipCommand}" Margin="5,0" Width="80"/>
             <TextBlock x:Name="ReputationText" Text="{Binding ReputationString}" FontWeight="Bold" Width="200"/>
         </StackPanel>
-        <ItemsControl ItemsSource="{Binding Items}" Grid.Row="1">
+        <ItemsControl ItemsSource="{Binding Items}" Grid.Row="1" RenderTransformOrigin="0.5,0.5" Margin="0,0,0,46">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
                     <UniformGrid Columns="3" Rows="2"/>
@@ -37,9 +37,9 @@
                         <StackPanel>
                             <TextBlock Text="{Binding Name}" FontWeight="Bold"/>
                             <TextBlock Text="{Binding Description}" FontStyle="Italic"/>
-                            <TextBlock Text="{Binding Price, StringFormat='Price: {0:C}'}"/>
+                            <TextBlock Text="{Binding Price, StringFormat=Price: \{0:C\}}"/>
                             <Button Content="Buy" 
-                                    Command="{Binding DataContext.OnItemCommand, Mode=Default, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                    Command="{Binding DataContext.OnItemCommand, Mode=Default, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" 
                                     CommandParameter="{Binding Id}"
                                     IsEnabled="{Binding IsNotSold}"/>
                         </StackPanel>
@@ -47,5 +47,9 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+        <StackPanel Orientation="Horizontal" Background="White" Margin="0,500,0,0" Grid.Row="1">
+            <TextBlock x:Name="TransactionText" Text="{Binding TransactionString}" FontWeight="Bold" Width="400" Height="50"/>
+            <TextBlock x:Name="ConnectionText" Text="{Binding ConnectionString}" FontWeight="Bold" Width="400" Height="50"/>
+        </StackPanel>
     </Grid>
 </Window>

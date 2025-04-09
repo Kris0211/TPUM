@@ -142,11 +142,15 @@ namespace ClientData
         public List<IItem> GetAvailableItems()
         {
             List<IItem> result = new List<IItem>();
-            lock (itemsLock)
-            {
-                result.AddRange(items.Values
-                    .Where(item => !item.IsSold)
-                    .Select(item => (IItem)item.Clone()));
+            lock(itemsLock)
+            { 
+                foreach (var item in items.Values)
+                {
+                    if (!item.IsSold)
+                    {
+                        result.Add((IItem)item.Clone());
+                    }
+                }
             }
 
             return result;
@@ -191,9 +195,13 @@ namespace ClientData
             List<IItem> result = new List<IItem>();
             lock (itemsLock)
             {
-                result.AddRange(items.Values
-                    .Where(item => item.Type == type)
-                    .Select(item => (IItem)item.Clone()));
+                foreach (IItem item in items.Values)
+                {
+                    if (item.Type == type)
+                    {
+                        result.Add((IItem)item.Clone());
+                    }
+                }
             }
 
             return result;

@@ -10,15 +10,15 @@ namespace ClientData
 {
     internal class WebSocketClient
     {
-        public static async Task<WebSocketConnection> Connect(Uri peer, Action<string>? logger)
+        public static async Task<WebSocketConnection> Connect(Uri uri, Action<string>? logger)
         {
             ClientWebSocket clientWebSocket = new ClientWebSocket();
-            await clientWebSocket.ConnectAsync(peer, CancellationToken.None);
+            await clientWebSocket.ConnectAsync(uri, CancellationToken.None);
             switch (clientWebSocket.State)
             {
                 case WebSocketState.Open:
-                    logger?.Invoke($"Opening WebSocket connection to remote server {peer}");
-                    WebSocketConnection socket = new ClientWebSocketConnection(clientWebSocket, peer, logger);
+                    logger?.Invoke($"Opening WebSocket connection to remote server {uri}");
+                    WebSocketConnection socket = new ClientWebSocketConnection(clientWebSocket, uri, logger);
                     return socket;
                 default:
                     logger?.Invoke($"Cannot connect to remote: status {clientWebSocket.State}");
@@ -30,12 +30,12 @@ namespace ClientData
         {
             private readonly ClientWebSocket clientWebSocket;
             private readonly Action<string> log;
-            private readonly Uri peer;
+            private readonly Uri uri;
 
-            public ClientWebSocketConnection(ClientWebSocket clientWebSocket, Uri peer, Action<string> log)
+            public ClientWebSocketConnection(ClientWebSocket clientWebSocket, Uri uri, Action<string> log)
             {
                 this.clientWebSocket = clientWebSocket;
-                this.peer = peer;
+                this.uri = uri;
                 this.log = log;
                 Task.Factory.StartNew(ClientMessageLoop);
             }
@@ -54,7 +54,7 @@ namespace ClientData
 
             public override string ToString()
             {
-                return peer.ToString();
+                return uri.ToString();
             }
 
             private void ClientMessageLoop()

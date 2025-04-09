@@ -164,7 +164,7 @@ namespace ViewModel
 
             if (!actualState)
             {
-                Task.Run(() => model.ModelConnectionService.Connect(new Uri(@"ws://localhost:21370")));
+                Task.Run(() => model.ModelConnectionService.Connect(new Uri(@"ws://localhost:11634")));
             }
             else
             {
@@ -261,7 +261,7 @@ namespace ViewModel
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new  PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

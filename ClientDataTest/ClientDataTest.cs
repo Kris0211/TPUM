@@ -16,7 +16,7 @@ namespace ClientDataTest
                 new ItemDTO(Guid.NewGuid(), "Name 1", "Description 1", "Generator", 2000.0f, false),
                 new ItemDTO(Guid.NewGuid(), "Name 2", "Description 2", "Spaceship", 10000.0f, false)
             ]);
-            Thread.Sleep(10);
+            Thread.Sleep(8);
         }
 
         [TestMethod]
@@ -48,13 +48,14 @@ namespace ClientDataTest
             PrepareData();
 
             List<IItem> itemsBefore = data.GetDepot().GetItems();
+
             float newReputation = 5.0f;
             connectionService.FakeReputationChanged(itemsBefore, 5.0f);
-            List<IItem> itemsAfter = data.GetDepot().GetItems();
 
             for (int i = 0; i < itemsBefore.Count; i++)
             {
-                Assert.AreEqual(itemsBefore[i].Price * newReputation, itemsAfter[i].Price);
+                IItem item = data.GetDepot().GetItems()[i];
+                Assert.AreEqual(itemsBefore[i].Price * newReputation, item.Price);
             }
         }
 
@@ -84,11 +85,13 @@ namespace ClientDataTest
         public void GetItemByIdTest()
         {
             PrepareData();
+            Thread.Sleep(5);
 
             List<IItem> items = data.GetDepot().GetItems();
             IItem testItem = items[0];
+            IItem testItemById = data.GetDepot().GetItemByID(testItem.Id);
 
-            Assert.AreEqual(testItem, data.GetDepot().GetItemByID(testItem.Id));
+            Assert.AreEqual(testItem, testItemById);
         }
 
         [TestMethod]

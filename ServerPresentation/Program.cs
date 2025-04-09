@@ -23,7 +23,7 @@ namespace ServerPresentation
         {
             while (true)
             {
-                Console.WriteLine("Waiting for connect...");
+                Console.WriteLine("Waiting for client...");
                 await WebSocketServer.StartServer(11634, OnConnect);
             }
         }

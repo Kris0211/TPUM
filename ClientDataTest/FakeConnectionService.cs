@@ -48,7 +48,6 @@ namespace ClientDataTest
         }
 
         // Fields and methods for test purposes
-
         private Serializer serializer = Serializer.Create();
         public Guid lastSoldGuid;
 
