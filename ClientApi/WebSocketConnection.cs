@@ -1,13 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace ClientApi
+namespace ServerPresentation
 {
     public abstract class WebSocketConnection
     {
-        public virtual Action<string>? OnMessage { protected get; set; } = x => { };
-        public virtual Action? OnClose { protected get; set; } = () => { };
-        public virtual Action? OnError { protected get; set; } = () => { };
+        public virtual Action<string>? OnMessage { set; protected get; } = x => { };
+        public virtual Action? OnClose { set; protected get; } = () => { };
+        public virtual Action? OnError { set; protected get; } = () => { };
 
         public async Task SendAsync(string message)
         {

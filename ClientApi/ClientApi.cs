@@ -1,39 +1,41 @@
-﻿using System;
-using System.Text.Json.Serialization;
-
-namespace ClientApi
+﻿namespace ClientApi
 {
     [Serializable]
     public abstract class ServerCommand
     {
         public string Header;
 
-        protected ServerCommand(string header) 
+        protected ServerCommand(string header)
         {
             Header = header;
         }
     }
 
     [Serializable]
-    public class  GetItemsCommand : ServerCommand
+    public class GetItemsCommand : ServerCommand
     {
-        public static string HeaderStatic = "GetItems";
+        public static string StaticHeader = "GetItems";
 
-        public GetItemsCommand() : base(HeaderStatic) { }
+        public GetItemsCommand()
+        : base(StaticHeader)
+        {
+
+        }
     }
 
     [Serializable]
     public class SellItemCommand : ServerCommand
     {
-        public static string HeaderStatic = "SellItem";
+        public static string StaticHeader = "SellItem";
 
-        public Guid TransactionId;
-        public Guid ItemId;
+        public Guid TransactionID;
+        public Guid ItemID;
 
-        public SellItemCommand(Guid id) : base(HeaderStatic)
+        public SellItemCommand(Guid id)
+        : base(StaticHeader)
         {
-            TransactionId = Guid.NewGuid();
-            ItemId = id;
+            TransactionID = Guid.NewGuid();
+            ItemID = id;
         }
     }
 
@@ -61,12 +63,12 @@ namespace ClientApi
     [Serializable]
     public struct NewPriceDTO
     {
-        public Guid ItemId;
+        public Guid ItemID;
         public float NewPrice;
 
-        public NewPriceDTO(Guid id, float newPrice)
+        public NewPriceDTO(Guid itemId, float newPrice)
         {
-            ItemId = id;
+            ItemID = itemId;
             NewPrice = newPrice;
         }
     }
@@ -85,32 +87,43 @@ namespace ClientApi
     [Serializable]
     public class UpdateAllResponse : ServerResponse
     {
-        public static readonly string HeaderStatic = "UpdateAllItems";
+        public static readonly string StaticHeader = "UpdateAllItems";
 
         public ItemDTO[]? Items;
 
-        public UpdateAllResponse() : base(HeaderStatic) { }
+        public UpdateAllResponse()
+            : base(StaticHeader)
+        {
+        }
     }
 
     [Serializable]
     public class ReputationChangedResponse : ServerResponse
     {
-        public static readonly string HeaderStatic = "ReputationChanged";
+        public static readonly string StaticHeader = "ReputationChanged";
 
         public float NewReputation;
         public NewPriceDTO[]? NewPrices;
 
-        public ReputationChangedResponse() : base(HeaderStatic) { }
+        public ReputationChangedResponse()
+            : base(StaticHeader)
+        {
+        }
+
     }
 
     [Serializable]
     public class TransactionResponse : ServerResponse
     {
-        public static readonly string HeaderStatic = "TransactionResponse";
+        public static readonly string StaticHeader = "TransactionResponse";
 
         public Guid TransactionId;
         public bool Succeeded;
 
-        public TransactionResponse() : base(HeaderStatic) { }
+        public TransactionResponse()
+            : base(StaticHeader)
+        {
+        }
+
     }
 }
