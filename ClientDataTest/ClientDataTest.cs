@@ -16,61 +16,6 @@ namespace ClientDataTest
                 new ItemDTO(Guid.NewGuid(), "Name 1", "Description 1", "Generator", 2000.0f, false),
                 new ItemDTO(Guid.NewGuid(), "Name 2", "Description 2", "Spaceship", 10000.0f, false)
             ]);
-            Thread.Sleep(8);
-        }
-
-        [TestMethod]
-        public void UpdateAllTest()
-        {
-            PrepareData();
-
-            ItemDTO[] itemDTOs = [
-                new ItemDTO(Guid.NewGuid(), "Name 3", "Description 3", "Generator", 2000.0f, false),
-                new ItemDTO(Guid.NewGuid(), "Name 4", "Description 4", "Spaceship", 11111.0f, false)
-            ];
-
-            connectionService.FakeUpdateAll(itemDTOs);
-            List<IItem> items = data.GetDepot().GetItems();
-
-            for (int i = 0; i < itemDTOs.Length; i++)
-            {
-                Assert.AreEqual(itemDTOs[i].Id, items[i].Id);
-                Assert.AreEqual(itemDTOs[i].Name, items[i].Name);
-                Assert.AreEqual(itemDTOs[i].Description,items[i].Description);
-                Assert.AreEqual(itemDTOs[i].Price, items[i].Price);
-                Assert.AreEqual(itemDTOs[i].IsSold, items[i].IsSold);
-            }
-        }
-
-        [TestMethod]
-        public void ReputationChangeTest()
-        {
-            PrepareData();
-
-            List<IItem> itemsBefore = data.GetDepot().GetItems();
-
-            float newReputation = 5.0f;
-            connectionService.FakeReputationChanged(itemsBefore, 5.0f);
-
-            for (int i = 0; i < itemsBefore.Count; i++)
-            {
-                IItem item = data.GetDepot().GetItems()[i];
-                Assert.AreEqual(itemsBefore[i].Price * newReputation, item.Price);
-            }
-        }
-
-        [TestMethod]
-        public async Task SellItemTest()
-        {
-            Guid sellGuid = Guid.NewGuid();
-            connectionService.FakeUpdateAll([
-                new ItemDTO(sellGuid, "Name 1", "Description 1", "Generator", 2000.0f, false),
-                new ItemDTO(Guid.NewGuid(), "Name 2", "Description 2", "Spaceship", 10000.0f, false)
-                ]);
-
-            await data.GetDepot().SellItem(sellGuid);
-
-            Assert.AreEqual(sellGuid, connectionService.lastSoldGuid);
         }
 
         [TestMethod]
@@ -85,7 +30,16 @@ namespace ClientDataTest
         public void GetItemByIdTest()
         {
             PrepareData();
-            Thread.Sleep(5);
+
+            ManualResetEvent transactionFinishedEvent = new ManualResetEvent(false);
+
+            data.GetDepot().TransactionFinished += (succeeded) =>
+            {
+                transactionFinishedEvent.Set();
+            };
+
+            bool eventTriggered = transactionFinishedEvent.WaitOne(TimeSpan.FromSeconds(3));
+            Assert.IsTrue(eventTriggered, "Transaction timed out.");
 
             List<IItem> items = data.GetDepot().GetItems();
             IItem testItem = items[0];
@@ -104,6 +58,72 @@ namespace ClientDataTest
             foreach (IItem item in foundItems)
             {
                 Assert.AreEqual(item.Type, ItemType.Generator);
+            }
+        }
+
+        [TestMethod]
+        public async Task SellItemTest()
+        {
+            Guid sellGuid = Guid.NewGuid();
+            connectionService.FakeUpdateAll([
+                new ItemDTO(sellGuid, "Name 1", "Description 1", "Generator", 2000.0f, false),
+                new ItemDTO(Guid.NewGuid(), "Name 2", "Description 2", "Spaceship", 10000.0f, false)
+                ]);
+
+            await data.GetDepot().SellItem(sellGuid);         
+
+            Assert.AreEqual(sellGuid, connectionService.lastSoldGuid);
+        }
+
+        [TestMethod]
+        public void UpdateAllTest()
+        {
+            PrepareData();
+
+            ItemDTO[] itemDTOs = [
+                new ItemDTO(Guid.NewGuid(), "Name 3", "Description 3", "Generator", 2000.0f, false),
+                new ItemDTO(Guid.NewGuid(), "Name 4", "Description 4", "Spaceship", 10000.0f, false)
+            ];
+
+            connectionService.FakeUpdateAll(itemDTOs);
+
+            List<IItem> items = data.GetDepot().GetItems();
+
+            for (int i = 0; i < itemDTOs.Length; i++)
+            {
+                Assert.AreEqual(itemDTOs[i].Id, items[i].Id);
+                Assert.AreEqual(itemDTOs[i].Name, items[i].Name);
+                Assert.AreEqual(itemDTOs[i].Description, items[i].Description);
+                Assert.AreEqual(itemDTOs[i].Price, items[i].Price);
+                Assert.AreEqual(itemDTOs[i].IsSold, items[i].IsSold);
+            }
+        }
+
+        [TestMethod]
+        public void ReputationChangeTest()
+        {
+            PrepareData();
+
+            List<IItem> itemsBefore = data.GetDepot().GetItems();
+
+            float newReputation = 5.0f;
+            connectionService.FakeReputationChanged(itemsBefore, 5.0f);
+
+            ManualResetEvent transactionFinishedEvent = new ManualResetEvent(false);
+
+            data.GetDepot().TransactionFinished += (succeeded) =>
+            {
+                transactionFinishedEvent.Set();
+            };
+
+            bool eventTriggered = transactionFinishedEvent.WaitOne(TimeSpan.FromSeconds(3));
+            Assert.IsTrue(eventTriggered, "Transaction timed out.");
+
+            List<IItem> itemsAfter = data.GetDepot().GetItems();
+            for (int i = 0; i < itemsBefore.Count; i++)
+            {
+                IItem item = itemsAfter[i];
+                Assert.AreEqual(itemsBefore[i].Price * newReputation, item.Price);
             }
         }
     }
