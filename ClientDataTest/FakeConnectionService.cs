@@ -57,12 +57,13 @@ namespace ClientDataTest
             response.NewReputation = newReputation;
 
             NewPriceDTO[] newPriceDTOs = new NewPriceDTO[items.Count];
-            int i = 0;
-            foreach (IItem item in items)
+            for (int i = 0; i < items.Count; i++)
             {
-                newPriceDTOs[i].ItemID = item.Id;
-                newPriceDTOs[i].NewPrice = item.Price * newReputation;
-                i++;
+                newPriceDTOs[i] = new NewPriceDTO
+                {
+                    ItemID = items[i].Id,
+                    NewPrice = items[i].Price * newReputation
+                };
             }
             response.NewPrices = newPriceDTOs;
 

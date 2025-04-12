@@ -1,11 +1,10 @@
-﻿using ClientLogic;
-using Model;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Model;
 
 namespace ViewModel
 {
@@ -113,9 +112,9 @@ namespace ViewModel
 
             CurrentTab = TabEnum.All;
             Items = new AsyncObservableCollection<ItemPresentation>();
-            foreach (IStoreItem item in model.DepotPresentation.GetItems())
+            foreach (ItemPresentation item in model.DepotPresentation.GetItems())
             {
-                Items.Add(new ItemPresentation(item));
+                Items.Add(item);
             }
 
             reputationString = "Reputation: 1.0";

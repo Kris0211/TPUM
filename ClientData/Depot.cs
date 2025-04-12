@@ -55,8 +55,18 @@ namespace ClientData
                 TransactionResponse response = serializer.Deserialize<TransactionResponse>(message);
                 if (response.Succeeded)
                 {
-                    Task.Run(() => RequestItems());
-                    TransactionFinished?.Invoke(true);
+                    Task requestItemsTask = Task.Run(() => RequestItems());
+                    requestItemsTask.ContinueWith(t =>
+                    {
+                        if (t.Status == TaskStatus.RanToCompletion)
+                        {
+                            TransactionFinished?.Invoke(true);
+                        }
+                        else
+                        {
+                            TransactionFinished?.Invoke(false);
+                        }
+                    });
                 }
                 else
                 {
@@ -133,7 +143,10 @@ namespace ClientData
             List<IItem> result = new List<IItem>();
             lock (itemsLock)
             {
-                result.AddRange(items.Values.Select(item => (IItem)item.Clone()));
+                foreach (var item in items.Values)
+                {
+                    result.Add((IItem)item.Clone());
+                }
             }
 
             return result;

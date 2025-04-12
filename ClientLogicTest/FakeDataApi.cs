@@ -2,7 +2,7 @@
 
 namespace LogicTest
 {
-    public class FakeDataApi : AbstractDataApi
+    internal class FakeDataApi : AbstractDataApi
     {
         private readonly FakeDepot fakeDepot = new FakeDepot();
         private readonly FakeConnectionService fakeConnectionService = new FakeConnectionService();
@@ -18,7 +18,7 @@ namespace LogicTest
         }
     }
 
-    public class FakeItem : IItem
+    internal class FakeItem : IItem
     {
         public FakeItem(string name, string description, ItemType type, float price, bool isSold)
         {
@@ -42,7 +42,7 @@ namespace LogicTest
         }
     }
 
-    public class FakeDepot : IDepot
+    internal class FakeDepot : IDepot
     {
         private readonly List<IItem> allItems;
         private readonly List<IItem> availableItems;
@@ -148,7 +148,7 @@ namespace LogicTest
         }
     }
 
-    public class FakeConnectionService : IConnectionService
+    internal class FakeConnectionService : IConnectionService
     {
         public event Action<string>? Logger;
         public event Action? OnConnectionStateChanged;

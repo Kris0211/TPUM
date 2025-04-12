@@ -21,7 +21,6 @@ namespace ClientApi
         public GetItemsCommand()
         : base(StaticHeader)
         {
-
         }
     }
 
@@ -126,6 +125,5 @@ namespace ClientApi
             : base(StaticHeader)
         {
         }
-
     }
 }

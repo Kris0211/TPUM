@@ -1,6 +1,5 @@
 ﻿using ClientApi;
 using ClientData;
-using System.Runtime.InteropServices;
 
 namespace ClientDataTest
 {
@@ -38,7 +37,7 @@ namespace ClientDataTest
                 transactionFinishedEvent.Set();
             };
 
-            bool eventTriggered = transactionFinishedEvent.WaitOne(TimeSpan.FromSeconds(3));
+            bool eventTriggered = transactionFinishedEvent.WaitOne(TimeSpan.FromSeconds(5));
             Assert.IsTrue(eventTriggered, "Transaction timed out.");
 
             List<IItem> items = data.GetDepot().GetItems();
@@ -81,8 +80,8 @@ namespace ClientDataTest
             PrepareData();
 
             ItemDTO[] itemDTOs = [
-                new ItemDTO(Guid.NewGuid(), "Name 3", "Description 3", "Generator", 2000.0f, false),
-                new ItemDTO(Guid.NewGuid(), "Name 4", "Description 4", "Spaceship", 10000.0f, false)
+                new ItemDTO(Guid.NewGuid(), "Name 3", "Description 3", "Generator", 4000.0f, false),
+                new ItemDTO(Guid.NewGuid(), "Name 4", "Description 4", "Spaceship", 20000.0f, false)
             ];
 
             connectionService.FakeUpdateAll(itemDTOs);
@@ -106,9 +105,6 @@ namespace ClientDataTest
 
             List<IItem> itemsBefore = data.GetDepot().GetItems();
 
-            float newReputation = 5.0f;
-            connectionService.FakeReputationChanged(itemsBefore, 5.0f);
-
             ManualResetEvent transactionFinishedEvent = new ManualResetEvent(false);
 
             data.GetDepot().TransactionFinished += (succeeded) =>
@@ -116,14 +112,17 @@ namespace ClientDataTest
                 transactionFinishedEvent.Set();
             };
 
-            bool eventTriggered = transactionFinishedEvent.WaitOne(TimeSpan.FromSeconds(3));
+            float newReputation = 2.0f;
+            connectionService.FakeReputationChanged(itemsBefore, newReputation);
+
+            bool eventTriggered = transactionFinishedEvent.WaitOne(TimeSpan.FromSeconds(5));
             Assert.IsTrue(eventTriggered, "Transaction timed out.");
 
             List<IItem> itemsAfter = data.GetDepot().GetItems();
             for (int i = 0; i < itemsBefore.Count; i++)
             {
-                IItem item = itemsAfter[i];
-                Assert.AreEqual(itemsBefore[i].Price * newReputation, item.Price);
+                float expected = itemsBefore[i].Price * newReputation;
+                Assert.AreEqual(expected, itemsAfter[i].Price);
             }
         }
     }

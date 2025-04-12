@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ClientApi;
 using ServerLogic;
@@ -84,7 +83,11 @@ namespace ServerPresentation
 
             UpdateAllResponse serverResponse = new UpdateAllResponse();
             List<IStoreItem> items = logicAbstractApi.GetStore().GetItems();
-            serverResponse.Items = items.Select(x => x.ToDTO()).ToArray();
+            serverResponse.Items = new ItemDTO[items.Count];
+            for (int i = 0; i < items.Count; i++)
+            {
+                serverResponse.Items[i] = items[i].ToDTO();
+            }
 
             Serializer serializer = Serializer.Create();
             string responseJson = serializer.Serialize(serverResponse);
@@ -103,7 +106,12 @@ namespace ServerPresentation
             List<IStoreItem> items = logicAbstractApi.GetStore().GetItems();
             ReputationChangedResponse reputationChangedResponse = new ReputationChangedResponse();
             reputationChangedResponse.NewReputation = args.NewReputation;
-            reputationChangedResponse.NewPrices = items.Select(x => new NewPriceDTO(x.Id, x.Price)).ToArray();
+            reputationChangedResponse.NewPrices = new NewPriceDTO[items.Count];
+            for (int i = 0; i < items.Count; i++)
+            {
+                IStoreItem item = items[i];
+                reputationChangedResponse.NewPrices[i] = new NewPriceDTO(item.Id, item.Price);
+            }
 
             Serializer serializer = Serializer.Create();
             string responseJson = serializer.Serialize(reputationChangedResponse);

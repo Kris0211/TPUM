@@ -2,7 +2,7 @@
 
 namespace ServerLogicTest
 {
-    public class FakeDataApi : AbstractDataApi
+    internal class FakeDataApi : AbstractDataApi
     {
         private readonly FakeDepot fakeDepot = new FakeDepot();
 
@@ -12,7 +12,7 @@ namespace ServerLogicTest
         }
     }
 
-    public class FakeItem : IItem
+    internal class FakeItem : IItem
     {
         public FakeItem(string name, string description, ItemType type, float price, bool isSold)
         {
@@ -36,7 +36,7 @@ namespace ServerLogicTest
         }
     }
 
-    public class FakeDepot : IDepot
+    internal class FakeDepot : IDepot
     {
         private readonly List<IItem> items;
 
