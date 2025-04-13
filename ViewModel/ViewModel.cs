@@ -37,8 +37,8 @@ namespace ViewModel
 
         private Model.Model model;
 
-        private ObservableCollection<ItemPresentation> items;
-        public ObservableCollection<ItemPresentation> Items
+        private AsyncObservableCollection<ViewModelItem> items;
+        public AsyncObservableCollection<ViewModelItem> Items
         {
             get => items;
 
@@ -111,10 +111,10 @@ namespace ViewModel
             OnConnectionStateChanged();
 
             CurrentTab = TabEnum.All;
-            Items = new AsyncObservableCollection<ItemPresentation>();
+            Items = new AsyncObservableCollection<ViewModelItem>();
             foreach (ItemPresentation item in model.DepotPresentation.GetItems())
             {
-                Items.Add(item);
+                Items.Add(new ViewModelItem(item));
             }
 
             reputationString = "Reputation: 1.0";
@@ -238,21 +238,21 @@ namespace ViewModel
             {
                 foreach (ItemPresentation item in model.DepotPresentation.GetItems())
                 {
-                    items.Add(item);
+                    items.Add(new ViewModelItem(item));
                 }
             }
             else if (CurrentTab == TabEnum.Available)
             {
                 foreach (ItemPresentation item in model.DepotPresentation.GetAvailableItems())
                 {
-                    items.Add(item);
+                    items.Add(new ViewModelItem(item));
                 }
             }
             else
             {
                 foreach (ItemPresentation item in model.DepotPresentation.GetItemsByType((PresentationItemType)CurrentTab))
                 {
-                    items.Add(item);
+                    items.Add(new ViewModelItem(item));
                 }
             }
         }

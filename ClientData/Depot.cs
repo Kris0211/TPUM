@@ -40,17 +40,17 @@ namespace ClientData
         {
             Serializer serializer = Serializer.Create();
 
-            if (serializer.GetResponseHeader(message) == UpdateAllResponse.StaticHeader)
+            if (serializer.GetResponseHeader(message) == ServerStatics.UpdateAllResponseHeader)
             {
                 UpdateAllResponse response = serializer.Deserialize<UpdateAllResponse>(message);
                 UpdateAllProducts(response);
             }
-            else if (serializer.GetResponseHeader(message) == ReputationChangedResponse.StaticHeader)
+            else if (serializer.GetResponseHeader(message) == ServerStatics.ReputationChangedResponseHeader)
             {
                 ReputationChangedResponse response = serializer.Deserialize<ReputationChangedResponse>(message);
                 UpdateAllPrices(response);
             }
-            else if (serializer.GetResponseHeader(message) == TransactionResponse.StaticHeader)
+            else if (serializer.GetResponseHeader(message) == ServerStatics.TransactionResponseHeader)
             {
                 TransactionResponse response = serializer.Deserialize<TransactionResponse>(message);
                 if (response.Succeeded)
@@ -101,9 +101,9 @@ namespace ClientData
             {
                 foreach (var newPrice in response.NewPrices)
                 {
-                    if (items.ContainsKey(newPrice.ItemID))
+                    if (items.ContainsKey(newPrice.ItemId))
                     {
-                        items[newPrice.ItemID].Price = newPrice.NewPrice;
+                        items[newPrice.ItemId].Price = newPrice.NewPrice;
                     }
                 }
             }
@@ -117,7 +117,8 @@ namespace ClientData
         public async Task RequestItems()
         {
             Serializer serializer = Serializer.Create();
-            await connectionService.SendAsync(serializer.Serialize(new GetItemsCommand()));
+            GetItemsCommand itemsCommand = new GetItemsCommand { Header = ServerStatics.GetItemsCommandHeader };
+            await connectionService.SendAsync(serializer.Serialize(itemsCommand));
         }
 
         public void RequestUpdate()
@@ -133,7 +134,12 @@ namespace ClientData
             if (connectionService.IsConnected())
             {
                 Serializer serializer = Serializer.Create();
-                SellItemCommand sellItemCommand = new SellItemCommand(itemId);
+                SellItemCommand sellItemCommand = new SellItemCommand
+                {
+                    Header = ServerStatics.SellItemCommandHeader,
+                    ItemId = itemId,
+                    TransactionId = Guid.Empty
+                };
                 await connectionService.SendAsync(serializer.Serialize(sellItemCommand));
             }
         }

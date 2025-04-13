@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ClientApi;
+using ClientData;
 using ServerLogic;
 
 namespace ServerPresentation
@@ -46,20 +47,20 @@ namespace ServerPresentation
             Console.WriteLine($"New message: {message}");
 
             Serializer serializer = Serializer.Create();
-            if (serializer.GetCommandHeader(message) == GetItemsCommand.StaticHeader)
+            if (serializer.GetCommandHeader(message) == GetItemsCommand.HeaderStatic)
             {
                 GetItemsCommand getItemsCommand = serializer.Deserialize<GetItemsCommand>(message);
                 Task task = Task.Run(async () => await SendItems());
             }
-            else if (serializer.GetCommandHeader(message) == SellItemCommand.StaticHeader)
+            else if (serializer.GetCommandHeader(message) == SellItemCommand.HeaderStatic)
             {
                 SellItemCommand sellItemCommand = serializer.Deserialize<SellItemCommand>(message);
 
                 TransactionResponse transactionResponse = new TransactionResponse();
-                transactionResponse.TransactionId = sellItemCommand.TransactionID;
+                transactionResponse.TransactionId = sellItemCommand.TransactionId;
                 try
                 {
-                    logicAbstractApi.GetStore().SellItem(sellItemCommand.ItemID);
+                    logicAbstractApi.GetStore().SellItem(sellItemCommand.ItemId);
                     transactionResponse.Succeeded = true;
                 }
                 catch (Exception exception)

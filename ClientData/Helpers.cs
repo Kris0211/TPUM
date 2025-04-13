@@ -10,6 +10,11 @@ namespace ClientData
             return (ItemType)Enum.Parse(typeof(ItemType), typeStr);
         }
 
+        public static string ToString(this ItemType typeAsString)
+        {
+            return Enum.GetName(typeof(ItemType), typeAsString) ?? throw new InvalidOperationException();
+        }
+
         public static IItem ToItem(this ItemDTO itemDTO)
         {
             return new Item(itemDTO.Id, itemDTO.Name, itemDTO.Description, 

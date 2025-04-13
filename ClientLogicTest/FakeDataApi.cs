@@ -78,7 +78,7 @@ namespace LogicTest
             return 1f;
         }
 
-        public event EventHandler<ReputationChangedEventArgs>? InflationChanged;
+        public event EventHandler<ReputationChangedEventArgs>? ReputationChanged;
         public event Action? ItemsUpdated;
         public event Action<bool>? TransactionFinished;
 

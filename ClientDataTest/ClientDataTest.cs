@@ -1,5 +1,6 @@
 ﻿using ClientApi;
 using ClientData;
+using System.Runtime.CompilerServices;
 
 namespace ClientDataTest
 {
@@ -12,8 +13,8 @@ namespace ClientDataTest
         public void PrepareData()
         {
             connectionService.FakeUpdateAll([
-                new ItemDTO(Guid.NewGuid(), "Name 1", "Description 1", "Generator", 2000.0f, false),
-                new ItemDTO(Guid.NewGuid(), "Name 2", "Description 2", "Spaceship", 10000.0f, false)
+                new ItemDTO { Id = Guid.NewGuid(), Name = "Name 1", Description = "Description 1", Type = "Generator", Price = 2000.0f, IsSold = false},
+                new FakeItemDTO { Id = Guid.NewGuid(), Name = "Name 2", Description = "Description 2", Type = "Spaceship", Price = 10000.0f, IsSold = false}
             ]);
         }
 
@@ -65,8 +66,8 @@ namespace ClientDataTest
         {
             Guid sellGuid = Guid.NewGuid();
             connectionService.FakeUpdateAll([
-                new ItemDTO(sellGuid, "Name 1", "Description 1", "Generator", 2000.0f, false),
-                new ItemDTO(Guid.NewGuid(), "Name 2", "Description 2", "Spaceship", 10000.0f, false)
+                new FakeItemDTO { Id = sellGuid, Name = "Name 1", Description = "Description 1", Type = "Generator", Price = 2000.0f, IsSold = false },
+                new FakeItemDTO { Id = Guid.NewGuid(), Name = "Name 2", Description = "Description 2", Type = "Spaceship", Price = 10000.0f, IsSold = false }
                 ]);
 
             await data.GetDepot().SellItem(sellGuid);         
@@ -79,9 +80,9 @@ namespace ClientDataTest
         {
             PrepareData();
 
-            ItemDTO[] itemDTOs = [
-                new ItemDTO(Guid.NewGuid(), "Name 3", "Description 3", "Generator", 4000.0f, false),
-                new ItemDTO(Guid.NewGuid(), "Name 4", "Description 4", "Spaceship", 20000.0f, false)
+            FakeItemDTO[] itemDTOs = [
+                new FakeItemDTO{ Id = Guid.NewGuid(), Name = "Name 3", Description = "Description 3", Type = "Generator", Price = 4000.0f, IsSold = false },
+                new FakeItemDTO{ Id = Guid.NewGuid(), Name = "Name 4", Description = "Description 4", Type = "Spaceship", Price = 20000.0f, IsSold = false }
             ];
 
             connectionService.FakeUpdateAll(itemDTOs);
