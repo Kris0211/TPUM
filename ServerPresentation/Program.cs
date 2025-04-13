@@ -101,7 +101,7 @@ namespace ServerPresentation
             if (webSocketConnection == null)
                 return;
 
-            Console.WriteLine($"New inflation: {args.NewReputation}");
+            Console.WriteLine($"New reputation: {args.NewReputation}");
 
             List<IStoreItem> items = logicAbstractApi.GetStore().GetItems();
             ReputationChangedResponse reputationChangedResponse = new ReputationChangedResponse();

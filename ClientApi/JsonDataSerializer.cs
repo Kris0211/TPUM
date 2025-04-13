@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ServerPresentation
+namespace ClientData
 {
     internal class JsonDataSerializer : Serializer
     {
@@ -13,6 +13,17 @@ namespace ServerPresentation
         public override T Deserialize<T>(string message)
         {
             return JsonConvert.DeserializeObject<T>(message);
+        }
+
+        public override string? GetResponseHeader(string message)
+        {
+            JObject jObject = JObject.Parse(message);
+            if (jObject.TryGetValue("Header", out JToken? value))
+            {
+                return (string)value;
+            }
+
+            return null;
         }
 
         public override string? GetCommandHeader(string message)
