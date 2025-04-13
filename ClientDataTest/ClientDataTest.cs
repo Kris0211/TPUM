@@ -13,7 +13,7 @@ namespace ClientDataTest
         public void PrepareData()
         {
             connectionService.FakeUpdateAll([
-                new ItemDTO { Id = Guid.NewGuid(), Name = "Name 1", Description = "Description 1", Type = "Generator", Price = 2000.0f, IsSold = false},
+                new FakeItemDTO { Id = Guid.NewGuid(), Name = "Name 1", Description = "Description 1", Type = "Generator", Price = 2000.0f, IsSold = false},
                 new FakeItemDTO { Id = Guid.NewGuid(), Name = "Name 2", Description = "Description 2", Type = "Spaceship", Price = 10000.0f, IsSold = false}
             ]);
         }
