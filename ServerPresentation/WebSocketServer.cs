@@ -8,7 +8,7 @@ using ClientApi;
 
 namespace ServerPresentation
 {
-    internal static class WebSocketServer
+    public static class WebSocketServer
     {
         private const int HTTP_BAD_REQUEST = 400;
 
