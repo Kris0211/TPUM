@@ -1,8 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using ClientData;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Schema;
 using ServerPresentation;
+using ClientApi;
 
 namespace CommunicationTest
 {
@@ -53,6 +55,36 @@ namespace CommunicationTest
 
             await _client?.DisconnectAsync();
             await _server?.DisconnectAsync();
+        }
+
+        [TestMethod]
+        public void JsonSchemaTest()
+        {
+            ItemDTO item = new ItemDTO
+            (
+                Guid.NewGuid(),
+                "Item A",
+                "Description A",
+                "Weapon",
+                12.5f,
+                false
+            );
+
+            string json = JsonConvert.SerializeObject(item);
+            JObject jObject = JObject.Parse(json);
+
+            JSchema schema = LoadSchema();
+            bool isValid = jObject.IsValid(schema, out IList<string> errors);
+
+            Assert.IsTrue(isValid, $"JSON is invalid:\n{string.Join("\n", errors)}");
+        }
+
+        internal JSchema LoadSchema()
+        {
+            string schemaPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, 
+                "schema.json");
+            string schemaJson = File.ReadAllText(schemaPath);
+            return JSchema.Parse(schemaJson);
         }
     }
 }
