@@ -4,100 +4,175 @@
   "title": "Client API Schema",
   "type": "object",
   "definitions": {
-    "ItemDTO": {
-      "type": "object",
-      "properties": {
-        "Id": { "type": "string", "format": "uuid" },
-        "Name": { "type": "string" },
-        "Description": { "type": "string" },
-        "Type": { "type": "string" },
-        "Price": { "type": "number" },
-        "IsSold": { "type": "boolean" }
-      },
-      "required": ["Id", "Name", "Description", "Type", "Price", "IsSold"]
-    },
-    "NewPriceDTO": {
-      "type": "object",
-      "properties": {
-        "ItemId": { "type": "string", "format": "uuid" },
-        "NewPrice": { "type": "number" }
-      },
-      "required": ["ItemId", "NewPrice"]
-    },
-    "ServerCommand": {
-      "type": "object",
-      "properties": {
-        "Header": { "type": "string" }
-      },
-      "required": ["Header"]
-    },
-    "GetItemsCommand": {
-      "allOf": [
-        { "$ref": "#/definitions/ServerCommand" }
-      ]
-    },
-    "SellItemCommand": {
-      "allOf": [
-        { "$ref": "#/definitions/ServerCommand" },
-        {
-          "type": "object",
-          "properties": {
-            "TransactionId": { "type": "string", "format": "uuid" },
-            "ItemId": { "type": "string", "format": "uuid" }
+      "ItemDTO": {
+        "$id": "ItemDTO",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
           },
-          "required": ["TransactionId", "ItemId"]
-        }
-      ]
-    },
-    "ServerResponse": {
-      "type": "object",
-      "properties": {
-        "Header": { "type": "string" }
-      },
-      "required": ["Header"]
-    },
-    "UpdateAllResponse": {
-      "allOf": [
-        { "$ref": "#/definitions/ServerResponse" },
-        {
-          "type": "object",
-          "properties": {
-            "Items": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/ItemDTO" }
-            }
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number"
+          },
+          "isSold": {
+            "type": "boolean"
           }
         }
-      ]
-    },
-    "ReputationChangedResponse": {
-      "allOf": [
-        { "$ref": "#/definitions/ServerResponse" },
-        {
-          "type": "object",
-          "properties": {
-            "NewReputation": { "type": "number" },
-            "NewPrices": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/NewPriceDTO" }
+      },
+      "NewPriceDTO": {
+        "$id": "NewPriceDTO",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "itemId": {
+            "type": "string"
+          },
+          "newPrice": {
+            "type": "number"
+          }
+        }
+      },
+      "ServerCommand": {
+        "$id": "ServerCommand",
+        "type": "object",
+        "properties": {
+          "header": {
+            "type": "string"
+          }
+        }
+      },
+      "GetItemsCommand": {
+        "$id": "GetItemsCommand",
+        "type": "object",
+        "properties": {
+          "header": {
+            "type": "string"
+          }
+        }
+      },
+      "SellItemCommand": {
+        "$id": "SellItemCommand",
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string"
+          },
+          "itemId": {
+            "type": "string"
+          },
+          "header": {
+            "type": "string"
+          }
+        }
+      },
+      "ServerResponse": {
+        "$id": "ServerResponse",
+        "type": "object",
+        "properties": {
+          "header": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateAllResponse": {
+        "$id": "UpdateAllResponse",
+        "definitions": {
+          "ItemDTO": {
+            "$id": "ItemDTO",
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "price": {
+                "type": "number"
+              },
+              "isSold": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "properties": {
+          "items": {
+            "$id": "ItemDTO[]",
+            "type": "array",
+            "items": {
+              "$ref": "ItemDTO"
             }
           },
-          "required": ["NewReputation"]
+          "header": {
+            "type": "string"
+          }
         }
-      ]
-    },
-    "TransactionResponse": {
-      "allOf": [
-        { "$ref": "#/definitions/ServerResponse" },
-        {
-          "type": "object",
-          "properties": {
-            "TransactionId": { "type": "string", "format": "uuid" },
-            "Succeeded": { "type": "boolean" }
+      },
+      "ReputationChangedResponse": {
+        "$id": "ReputationChangedResponse",
+        "definitions": {
+          "NewPriceDTO": {
+            "$id": "NewPriceDTO",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "itemId": {
+                "type": "string"
+              },
+              "newPrice": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "type": "object",
+        "properties": {
+          "newReputation": {
+            "type": "number"
           },
-          "required": ["TransactionId", "Succeeded"]
+          "newPrices": {
+            "$id": "NewPriceDTO[]",
+            "type": "array",
+            "items": {
+              "$ref": "NewPriceDTO"
+            }
+          },
+          "header": {
+            "type": "string"
+          }
         }
-      ]
+      },
+      "TransactionResponse": {
+        "$id": "TransactionResponse",
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string"
+          },
+          "succeeded": {
+            "type": "boolean"
+          },
+          "header": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
-}
