@@ -9,7 +9,7 @@ namespace ACommunicationTest
 {
     
     [TestClass]
-    public class ACommunicationTest
+    public class CommunicationTest
     {
         internal JSchema LoadSchema()
         {

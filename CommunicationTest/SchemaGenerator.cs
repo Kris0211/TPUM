@@ -3,10 +3,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Schema;
 using Newtonsoft.Json.Schema.Generation;
 
-namespace CommunicationTest
+namespace ACommunicationTest
 {
     [TestClass]
-    public class SchemaGenerationTests
+    public class ASchemaGenerationTests
     {
         [TestMethod]
         public void GenerateAndSaveSchema()
