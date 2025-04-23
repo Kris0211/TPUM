@@ -35,7 +35,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerPresentation", "Serve
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientApi", "ClientApi\ClientApi.csproj", "{315EFBFA-C244-4B44-B399-8D4B68EC77BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommunicationTest", "CommunicationTest\CommunicationTest.csproj", "{4C4BE014-C3B7-457C-8FF7-A7A8D508FADD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ACommunicationTest", "CommunicationTest\ACommunicationTest.csproj", "{4C4BE014-C3B7-457C-8FF7-A7A8D508FADD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
